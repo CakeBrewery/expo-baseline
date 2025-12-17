@@ -33,9 +33,14 @@ To use in conjunction with [spring-boot-baseline](https://github.com/CakeBrewery
 - `tsconfig.json` – Strict TypeScript settings tuned for React Native.
 - `assets/` – Reserved for future icons, splash screens, and illustrations.
 
-### Next steps
+### API Client Generation
+This project uses an OpenAPI specification from the associated `spring-boot-baseline` project to generate its TypeScript API client.
 
-- Wire up an actual search bar using a debounced text input and data provider.
-- Model selected stocks in a global store (Zustand/Jotai/Recoil) to drive the workspace panels.
-- Integrate a charting solution compatible with Expo Web, such as Victory Native or React Native SVG Charts.
-- Layer on Expo Router when navigation beyond this single workspace screen is needed.
+1.  **Generate OpenAPI Spec (Backend):** First, ensure the `spring-boot-baseline` project has its OpenAPI specification (`openapi.json`) up-to-date. This is typically done by running `./gradlew generateOpenApiDocs` in the `spring-boot-baseline` directory.
+2.  **Copy OpenAPI Spec:** Copy the generated `openapi.json` from `spring-boot-baseline/build/api-spec/openapi.json` to `expo-baseline/src/openApi/openapi.json`.
+3.  **Generate Client (Frontend):** Run the following command in this directory to regenerate the TypeScript API client based on the updated `openapi.json`:
+
+    ```bash
+    npm run gen:api
+    ```
+    This command uses `openapi-typescript-codegen` to generate the client in `src/generated/api`. Changes in the backend's API contract will be reflected here after this step.

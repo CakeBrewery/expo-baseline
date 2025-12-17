@@ -46,7 +46,7 @@
         "parameters": [
           {
             "name": "userId",
-            "in": "path",
+            "in": "query",
             "description": "The UUID of the user.",
             "required": true,
             "schema": {
@@ -85,7 +85,7 @@
         "parameters": [
           {
             "name": "userId",
-            "in": "path",
+            "in": "query",
             "description": "The UUID of the user.",
             "required": true,
             "schema": {
@@ -247,7 +247,7 @@
         "parameters": [
           {
             "name": "userId",
-            "in": "path",
+            "in": "query",
             "description": "The UUID of the user.",
             "required": true,
             "schema": {
@@ -257,7 +257,7 @@
           },
           {
             "name": "symbol",
-            "in": "path",
+            "in": "query",
             "description": "The stock symbol to remove.",
             "required": true,
             "schema": {
