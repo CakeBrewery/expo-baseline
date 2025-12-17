@@ -46,7 +46,7 @@
         "parameters": [
           {
             "name": "userId",
-            "in": "query",
+            "in": "path",
             "description": "The UUID of the user.",
             "required": true,
             "schema": {
@@ -85,7 +85,7 @@
         "parameters": [
           {
             "name": "userId",
-            "in": "query",
+            "in": "path",
             "description": "The UUID of the user.",
             "required": true,
             "schema": {
@@ -142,13 +142,13 @@
         }
       }
     },
-    "/api/stock/monthly-time-series": {
+    "/api/stock/summary": {
       "get": {
         "tags": [
           "stock-controller"
         ],
-        "summary": "Get Monthly Time Series for a symbol",
-        "operationId": "getMonthlyTimeSeries",
+        "summary": "Get a pre-computed workspace summary for a symbol",
+        "operationId": "getStockSummary",
         "parameters": [
           {
             "name": "symbol",
@@ -165,69 +165,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/TimeSeriesMonthly"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stock/global-quote": {
-      "get": {
-        "tags": [
-          "stock-controller"
-        ],
-        "summary": "Get Global Quote for a symbol",
-        "operationId": "getGlobalQuote",
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/GlobalQuote"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/stock/company-overview": {
-      "get": {
-        "tags": [
-          "stock-controller"
-        ],
-        "summary": "Get Company Overview for a symbol",
-        "operationId": "getCompanyOverview",
-        "parameters": [
-          {
-            "name": "symbol",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/CompanyOverview"
+                  "$ref": "#/components/schemas/StockSummary"
                 }
               }
             }
@@ -247,7 +185,7 @@
         "parameters": [
           {
             "name": "userId",
-            "in": "query",
+            "in": "path",
             "description": "The UUID of the user.",
             "required": true,
             "schema": {
@@ -257,7 +195,7 @@
           },
           {
             "name": "symbol",
-            "in": "query",
+            "in": "path",
             "description": "The stock symbol to remove.",
             "required": true,
             "schema": {
@@ -342,235 +280,72 @@
           }
         }
       },
-      "MetaData": {
+      "PricePoint": {
         "type": "object",
         "properties": {
-          "information": {
+          "label": {
             "type": "string"
           },
-          "symbol": {
-            "type": "string"
-          },
-          "lastRefreshed": {
-            "type": "string"
-          },
-          "timeZone": {
-            "type": "string"
+          "value": {
+            "type": "number",
+            "format": "double"
           }
         }
       },
-      "MonthlyData": {
-        "type": "object",
-        "properties": {
-          "open": {
-            "type": "string"
-          },
-          "high": {
-            "type": "string"
-          },
-          "low": {
-            "type": "string"
-          },
-          "close": {
-            "type": "string"
-          },
-          "volume": {
-            "type": "string"
-          }
-        }
-      },
-      "TimeSeriesMonthly": {
-        "type": "object",
-        "properties": {
-          "metaData": {
-            "$ref": "#/components/schemas/MetaData"
-          },
-          "monthlyTimeSeries": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/MonthlyData"
-            }
-          }
-        }
-      },
-      "GlobalQuote": {
+      "StockSummary": {
         "type": "object",
         "properties": {
           "symbol": {
             "type": "string"
           },
-          "open": {
-            "type": "string"
-          },
-          "high": {
-            "type": "string"
-          },
-          "low": {
-            "type": "string"
-          },
-          "price": {
-            "type": "string"
-          },
-          "volume": {
-            "type": "string"
-          },
-          "latestTradingDay": {
-            "type": "string"
-          },
-          "previousClose": {
-            "type": "string"
-          },
-          "change": {
-            "type": "string"
-          },
-          "changePercent": {
-            "type": "string"
-          }
-        }
-      },
-      "CompanyOverview": {
-        "type": "object",
-        "properties": {
-          "symbol": {
-            "type": "string"
-          },
-          "assetType": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "cik": {
+          "companyName": {
             "type": "string"
           },
           "exchange": {
             "type": "string"
           },
-          "currency": {
-            "type": "string"
-          },
-          "country": {
-            "type": "string"
-          },
           "sector": {
             "type": "string"
           },
-          "industry": {
+          "timeline": {
             "type": "string"
           },
-          "address": {
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "dailyChange": {
+            "type": "number",
+            "format": "double"
+          },
+          "dailyChangePercent": {
+            "type": "number",
+            "format": "double"
+          },
+          "marketCap": {
+            "type": "number",
+            "format": "double"
+          },
+          "week52High": {
+            "type": "number",
+            "format": "double"
+          },
+          "week52Low": {
+            "type": "number",
+            "format": "double"
+          },
+          "yearStartPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "description": {
             "type": "string"
           },
-          "officialSite": {
-            "type": "string"
-          },
-          "fiscalYearEnd": {
-            "type": "string"
-          },
-          "latestQuarter": {
-            "type": "string"
-          },
-          "marketCapitalization": {
-            "type": "string"
-          },
-          "ebitda": {
-            "type": "string"
-          },
-          "peRatio": {
-            "type": "string"
-          },
-          "pegRatio": {
-            "type": "string"
-          },
-          "bookValue": {
-            "type": "string"
-          },
-          "dividendPerShare": {
-            "type": "string"
-          },
-          "dividendYield": {
-            "type": "string"
-          },
-          "eps": {
-            "type": "string"
-          },
-          "revenuePerShareTTM": {
-            "type": "string"
-          },
-          "profitMargin": {
-            "type": "string"
-          },
-          "operatingMarginTTM": {
-            "type": "string"
-          },
-          "returnOnAssetsTTM": {
-            "type": "string"
-          },
-          "returnOnEquityTTM": {
-            "type": "string"
-          },
-          "revenueTTM": {
-            "type": "string"
-          },
-          "grossProfitTTM": {
-            "type": "string"
-          },
-          "dilutedEPSTTM": {
-            "type": "string"
-          },
-          "quarterlyEarningsGrowthYOY": {
-            "type": "string"
-          },
-          "quarterlyRevenueGrowthYOY": {
-            "type": "string"
-          },
-          "analystTargetPrice": {
-            "type": "string"
-          },
-          "trailingPE": {
-            "type": "string"
-          },
-          "forwardPE": {
-            "type": "string"
-          },
-          "priceToSalesRatioTTM": {
-            "type": "string"
-          },
-          "priceToBookRatio": {
-            "type": "string"
-          },
-          "evToRevenue": {
-            "type": "string"
-          },
-          "evToEBITDA": {
-            "type": "string"
-          },
-          "beta": {
-            "type": "string"
-          },
-          "fiftyTwoWeekHigh": {
-            "type": "string"
-          },
-          "fiftyTwoWeekLow": {
-            "type": "string"
-          },
-          "fiftyDayMovingAverage": {
-            "type": "string"
-          },
-          "twoHundredDayMovingAverage": {
-            "type": "string"
-          },
-          "sharesOutstanding": {
-            "type": "string"
-          },
-          "dividendDate": {
-            "type": "string"
-          },
-          "exDividendDate": {
-            "type": "string"
+          "priceSeries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PricePoint"
+            }
           }
         }
       }

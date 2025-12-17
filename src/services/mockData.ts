@@ -1,298 +1,125 @@
-import { GlobalQuote, CompanyOverview, TimeSeriesMonthly } from '../generated/api';
+import { StockSummary } from '../generated/api';
 
-// NVDA data
-const MOCK_GLOBAL_QUOTE_NVDA: GlobalQuote = {
-    symbol: "NVDA",
-    open: "181.7600",
-    high: "185.6600",
-    low: "180.0000",
-    price: "181.4600",
-    volume: "177102589",
-    latestTradingDay: "2025-12-02",
-    previousClose: "179.9200",
-    change: "1.5400",
-    changePercent: "0.8559%"
+type SummarySeed = {
+  symbol: string;
+  companyName: string;
+  exchange: string;
+  sector: string;
+  price: number;
+  dailyChange: number;
+  dailyChangePercent: number;
+  marketCap: number;
+  description: string;
+  priceSeries: { label: string; value: number }[];
 };
 
-const MOCK_COMPANY_OVERVIEW_NVDA: CompanyOverview = {
-    symbol: "NVDA",
-    assetType: "Common Stock",
-    name: "NVIDIA Corporation",
-    description: "NVIDIA Corporation is a prominent American multinational technology firm based in Santa Clara, California...",
-    cik: "1045810",
-    exchange: "NASDAQ",
-    currency: "USD",
-    country: "USA",
-    sector: "TECHNOLOGY",
-    industry: "SEMICONDUCTORS",
-    address: "2788 SAN TOMAS EXPRESSWAY, SANTA CLARA, CA, UNITED STATES, 95051",
-    officialSite: "https://www.nvidia.com",
-    fiscalYearEnd: "January",
-    latestQuarter: "2025-10-31",
-    marketCapitalization: "4387809264000",
-    ebitda: "112696001000",
-    peRatio: "44.42",
-    pegRatio: "0.675",
-    bookValue: "4.892",
-    dividendPerShare: "0.04",
-    dividendYield: "0.0002",
-    eps: "4.05",
-    revenuePerShareTTM: "7.67",
-    profitMargin: "0.53",
-    operatingMarginTTM: "0.632",
-    returnOnAssetsTTM: "0.535",
-    returnOnEquityTTM: "1.074",
-    revenueTTM: "187141997000",
-    grossProfitTTM: "131092996000",
-    dilutedEPSTTM: "4.05",
-    quarterlyEarningsGrowthYOY: "0.667",
-    quarterlyRevenueGrowthYOY: "0.625",
-    analystTargetPrice: "250.66",
-    trailingPE: "44.42",
-    forwardPE: "23.15",
-    priceToSalesRatioTTM: "23.37",
-    priceToBookRatio: "36.18",
-    evToRevenue: "22.72",
-    evToEBITDA: "35.7",
-    beta: "2.269",
-    fiftyTwoWeekHigh: "212.19",
-    fiftyTwoWeekLow: "86.61",
-    fiftyDayMovingAverage: "186.89",
-    twoHundredDayMovingAverage: "153.89",
-    sharesOutstanding: "24347000000",
-    dividendDate: "2025-12-26",
-    exDividendDate: "2025-12-04"
+const buildSummary = (seed: SummarySeed): StockSummary => {
+  const values = seed.priceSeries.map(point => point.value ?? 0);
+  const week52High = values.length ? Math.max(...values) : 0;
+  const week52Low = values.length ? Math.min(...values) : 0;
+  const yearStartPrice = seed.priceSeries.length ? seed.priceSeries[0]?.value ?? 0 : 0;
+
+  return {
+    symbol: seed.symbol,
+    companyName: seed.companyName,
+    exchange: seed.exchange,
+    sector: seed.sector,
+    timeline: '1Y',
+    price: seed.price,
+    dailyChange: seed.dailyChange,
+    dailyChangePercent: seed.dailyChangePercent,
+    marketCap: seed.marketCap,
+    week52High,
+    week52Low,
+    yearStartPrice,
+    description: seed.description,
+    priceSeries: seed.priceSeries,
+  };
 };
 
-const MOCK_MONTHLY_TIME_SERIES_NVDA: TimeSeriesMonthly = {
-    metaData: {
-        information: "Monthly Prices (open, high, low, close) and Volumes",
-        symbol: "NVDA",
-        lastRefreshed: "2025-12-02",
-        timeZone: "US/Eastern"
-    },
-    monthlyTimeSeries: {
-        "2025-12-02": { open: "174.7600", high: "185.6600", low: "173.6800", close: "181.4600", volume: "365233544" },
-        "2025-11-28": { open: "208.0800", high: "211.3350", low: "169.5500", close: "177.0000", volume: "4155646938" },
-        "2025-10-31": { open: "185.2400", high: "212.1899", low: "176.7600", close: "202.4900", volume: "4031017222" },
-        "2025-09-30": { open: "170.0000", high: "187.3500", low: "164.0700", close: "186.5800", volume: "3887536545" },
-        "2025-08-29": { open: "174.0900", high: "184.4800", low: "168.8010", close: "174.1800", volume: "3609134562" },
-        "2025-07-31": { open: "156.2900", high: "183.3000", low: "151.4900", close: "177.8700", volume: "3596804483" },
-        "2025-06-30": { open: "135.4900", high: "158.7100", low: "135.4000", close: "157.9900", volume: "3822309699" },
-        "2025-05-30": { open: "113.0800", high: "143.4900", low: "110.8220", close: "135.1300", volume: "4759246184" },
-        "2025-04-30": { open: "108.5150", high: "115.1000", low: "86.6200", close: "108.9200", volume: "6811006433" },
-        "2025-03-31": { open: "123.5100", high: "123.7000", low: "103.6500", close: "108.3800", volume: "6175538770" },
-        "2025-02-28": { open: "114.7500", high: "143.4400", low: "113.0100", close: "124.9200", volume: "4756110221" },
-        "2025-01-31": { open: "136.0000", high: "153.1300", low: "116.2500", close: "120.0700", volume: "5950612536" },
-        "2024-12-31": { open: "138.8300", high: "146.5400", low: "126.8600", close: "134.2900", volume: "4086168557" },
-        "2024-11-29": { open: "134.7000", high: "152.8900", low: "131.8000", close: "138.2500", volume: "4498075137" },
-        "2024-10-31": { open: "121.7650", high: "144.4200", low: "115.1400", close: "132.7600", volume: "5628704792" },
-        "2024-09-30": { open: "116.0100", high: "127.6650", low: "100.9500", close: "121.4400", volume: "6268619540" },
-        "2024-08-30": { open: "117.5300", high: "131.2600", low: "90.6900", close: "119.3700", volume: "8105367559" },
-        "2024-07-31": { open: "123.4700", high: "136.1500", low: "102.5400", close: "117.0200", volume: "6407092755" }
-    }
-};
+const NVDA_SUMMARY = buildSummary({
+  symbol: 'NVDA',
+  companyName: 'NVIDIA Corporation',
+  exchange: 'NASDAQ',
+  sector: 'Semiconductors',
+  price: 181.46,
+  dailyChange: 1.54,
+  dailyChangePercent: 0.8559,
+  marketCap: 4_387_809_264_000,
+  description:
+    'NVIDIA powers accelerated computing workloads across data center, gaming, and edge surfaces. This template keeps the focus on core price action.',
+  priceSeries: [
+    { label: 'Aug', value: 52.8 },
+    { label: 'Sep', value: 55.1 },
+    { label: 'Oct', value: 58.4 },
+    { label: 'Nov', value: 63.5 },
+    { label: 'Dec', value: 66.9 },
+    { label: 'Jan', value: 71.2 },
+    { label: 'Feb', value: 77.5 },
+    { label: 'Mar', value: 88.4 },
+    { label: 'Apr', value: 96.8 },
+    { label: 'May', value: 111.5 },
+    { label: 'Jun', value: 124.2 },
+    { label: 'Jul', value: 130.5 },
+  ],
+});
 
-// MSFT data
-const MOCK_GLOBAL_QUOTE_MSFT: GlobalQuote = {
-    symbol: "MSFT",
-    open: "420.0000",
-    high: "425.5000",
-    low: "418.0000",
-    price: "422.3000",
-    volume: "50000000",
-    latestTradingDay: "2025-12-02",
-    previousClose: "421.0000",
-    change: "1.3000",
-    changePercent: "0.3088%"
-};
+const MSFT_SUMMARY = buildSummary({
+  symbol: 'MSFT',
+  companyName: 'Microsoft Corporation',
+  exchange: 'NASDAQ',
+  sector: 'Software Infrastructure',
+  price: 422.3,
+  dailyChange: 1.3,
+  dailyChangePercent: 0.3088,
+  marketCap: 3_150_000_000_000,
+  description:
+    'Microsoft’s cloud stack keeps compounding. Use this case to validate the shape of the summary payload against a mega-cap benchmark.',
+  priceSeries: [
+    { label: 'Aug', value: 305 },
+    { label: 'Sep', value: 312 },
+    { label: 'Oct', value: 320 },
+    { label: 'Nov', value: 330 },
+    { label: 'Dec', value: 338 },
+    { label: 'Jan', value: 345 },
+    { label: 'Feb', value: 352 },
+    { label: 'Mar', value: 360 },
+    { label: 'Apr', value: 372 },
+    { label: 'May', value: 388 },
+    { label: 'Jun', value: 402 },
+    { label: 'Jul', value: 418 },
+  ],
+});
 
-const MOCK_COMPANY_OVERVIEW_MSFT: CompanyOverview = {
-    symbol: "MSFT",
-    assetType: "Common Stock",
-    name: "Microsoft Corporation",
-    description: "Microsoft Corporation is an American multinational technology corporation...",
-    cik: "0000789019",
-    exchange: "NASDAQ",
-    currency: "USD",
-    country: "USA",
-    sector: "TECHNOLOGY",
-    industry: "SOFTWARE - INFRASTRUCTURE",
-    address: "ONE MICROSOFT WAY, REDMOND, WA, UNITED STATES, 98052-6399",
-    officialSite: "https://www.microsoft.com",
-    fiscalYearEnd: "June",
-    latestQuarter: "2025-09-30",
-    marketCapitalization: "3150000000000",
-    ebitda: "105000000000",
-    peRatio: "35.00",
-    pegRatio: "1.500",
-    bookValue: "15.00",
-    dividendPerShare: "2.80",
-    dividendYield: "0.0067",
-    eps: "12.00",
-    revenuePerShareTTM: "100.00",
-    profitMargin: "0.30",
-    operatingMarginTTM: "0.40",
-    returnOnAssetsTTM: "0.15",
-    returnOnEquityTTM: "0.45",
-    revenueTTM: "280000000000",
-    grossProfitTTM: "190000000000",
-    dilutedEPSTTM: "12.00",
-    quarterlyEarningsGrowthYOY: "0.15",
-    quarterlyRevenueGrowthYOY: "0.12",
-    analystTargetPrice: "450.00",
-    trailingPE: "35.00",
-    forwardPE: "30.00",
-    priceToSalesRatioTTM: "11.25",
-    priceToBookRatio: "28.00",
-    evToRevenue: "10.00",
-    evToEBITDA: "25.00",
-    beta: "0.90",
-    fiftyTwoWeekHigh: "430.00",
-    fiftyTwoWeekLow: "300.00",
-    fiftyDayMovingAverage: "410.00",
-    twoHundredDayMovingAverage: "380.00",
-    sharesOutstanding: "7400000000",
-    dividendDate: "2025-12-15",
-    exDividendDate: "2025-11-20"
-};
+const AMD_SUMMARY = buildSummary({
+  symbol: 'AMD',
+  companyName: 'Advanced Micro Devices, Inc.',
+  exchange: 'NASDAQ',
+  sector: 'Semiconductors',
+  price: 151.3,
+  dailyChange: 0.8,
+  dailyChangePercent: 0.5316,
+  marketCap: 245_000_000_000,
+  description:
+    'AMD continues to chase share in GPUs and data center compute. Great example to showcase how the UI responds to higher volatility.',
+  priceSeries: [
+    { label: 'Aug', value: 90 },
+    { label: 'Sep', value: 95 },
+    { label: 'Oct', value: 102 },
+    { label: 'Nov', value: 108 },
+    { label: 'Dec', value: 115 },
+    { label: 'Jan', value: 120 },
+    { label: 'Feb', value: 126 },
+    { label: 'Mar', value: 132 },
+    { label: 'Apr', value: 138 },
+    { label: 'May', value: 143 },
+    { label: 'Jun', value: 148 },
+    { label: 'Jul', value: 151 },
+  ],
+});
 
-const MOCK_MONTHLY_TIME_SERIES_MSFT: TimeSeriesMonthly = {
-    metaData: {
-        information: "Monthly Prices (open, high, low, close) and Volumes",
-        symbol: "MSFT",
-        lastRefreshed: "2025-12-02",
-        timeZone: "US/Eastern"
-    },
-    monthlyTimeSeries: {
-        "2025-12-02": { open: "420.0000", high: "425.5000", low: "418.0000", close: "422.3000", volume: "50000000" },
-        "2025-11-28": { open: "410.0000", high: "420.0000", low: "408.0000", close: "418.0000", volume: "48000000" },
-        "2025-10-31": { open: "400.0000", high: "412.0000", low: "398.0000", close: "409.0000", volume: "52000000" },
-        "2025-09-30": { open: "390.0000", high: "401.0000", low: "388.0000", close: "399.0000", volume: "55000000" },
-        "2025-08-29": { open: "380.0000", high: "392.0000", low: "378.0000", close: "390.0000", volume: "53000000" },
-        "2025-07-31": { open: "370.0000", high: "385.0000", low: "368.0000", close: "379.0000", volume: "58000000" },
-        "2025-06-30": { open: "360.0000", high: "372.0000", low: "358.0000", close: "370.0000", volume: "60000000" },
-        "2025-05-30": { open: "350.0000", high: "365.0000", low: "348.0000", close: "362.0000", volume: "62000000" },
-        "2025-04-30": { open: "340.0000", high: "355.0000", low: "338.0000", close: "352.0000", volume: "65000000" },
-        "2025-03-31": { open: "330.0000", high: "345.0000", low: "328.0000", close: "342.0000", volume: "68000000" },
-        "2025-02-28": { open: "320.0000", high: "335.0000", low: "318.0000", close: "332.0000", volume: "70000000" },
-        "2025-01-31": { open: "310.0000", high: "325.0000", low: "308.0000", close: "322.0000", volume: "72000000" },
-        "2024-12-31": { open: "300.0000", high: "315.0000", low: "298.0000", close: "312.0000", volume: "75000000" },
-        "2024-11-29": { open: "290.0000", high: "305.0000", low: "288.0000", close: "302.0000", volume: "78000000" },
-        "2024-10-31": { open: "280.0000", high: "295.0000", low: "278.0000", close: "292.0000", volume: "80000000" },
-        "2024-09-30": { open: "270.0000", high: "285.0000", low: "268.0000", close: "282.0000", volume: "83000000" },
-        "2024-08-30": { open: "260.0000", high: "275.0000", low: "258.0000", close: "272.0000", volume: "85000000" },
-        "2024-07-31": { open: "250.0000", high: "265.0000", low: "248.0000", close: "262.0000", volume: "88000000" }
-    }
-};
-
-// AMD data
-const MOCK_GLOBAL_QUOTE_AMD: GlobalQuote = {
-    symbol: "AMD",
-    open: "150.0000",
-    high: "152.5000",
-    low: "149.0000",
-    price: "151.3000",
-    volume: "75000000",
-    latestTradingDay: "2025-12-02",
-    previousClose: "150.5000",
-    change: "0.8000",
-    changePercent: "0.5316%"
-};
-
-const MOCK_COMPANY_OVERVIEW_AMD: CompanyOverview = {
-    symbol: "AMD",
-    assetType: "Common Stock",
-    name: "Advanced Micro Devices, Inc.",
-    description: "Advanced Micro Devices, Inc. (AMD) is an American multinational semiconductor company...",
-    cik: "0000002488",
-    exchange: "NASDAQ",
-    currency: "USD",
-    country: "USA",
-    sector: "TECHNOLOGY",
-    industry: "SEMICONDUCTORS",
-    address: "2485 AUGUSTINE DR, SANTA CLARA, CA, UNITED STATES, 95054",
-    officialSite: "https://www.amd.com",
-    fiscalYearEnd: "December",
-    latestQuarter: "2025-09-30",
-    marketCapitalization: "250000000000",
-    ebitda: "8000000000",
-    peRatio: "50.00",
-    pegRatio: "2.000",
-    bookValue: "10.00",
-    dividendPerShare: "0.00",
-    dividendYield: "0.0000",
-    eps: "3.00",
-    revenuePerShareTTM: "20.00",
-    profitMargin: "0.15",
-    operatingMarginTTM: "0.20",
-    returnOnAssetsTTM: "0.08",
-    returnOnEquityTTM: "0.25",
-    revenueTTM: "35000000000",
-    grossProfitTTM: "20000000000",
-    dilutedEPSTTM: "3.00",
-    quarterlyEarningsGrowthYOY: "0.10",
-    quarterlyRevenueGrowthYOY: "0.18",
-    analystTargetPrice: "170.00",
-    trailingPE: "50.00",
-    forwardPE: "40.00",
-    priceToSalesRatioTTM: "7.00",
-    priceToBookRatio: "15.00",
-    evToRevenue: "6.50",
-    evToEBITDA: "22.00",
-    beta: "1.50",
-    fiftyTwoWeekHigh: "160.00",
-    fiftyTwoWeekLow: "90.00",
-    fiftyDayMovingAverage: "145.00",
-    twoHundredDayMovingAverage: "130.00",
-    sharesOutstanding: "1600000000",
-    dividendDate: "N/A",
-    exDividendDate: "N/A"
-};
-
-const MOCK_MONTHLY_TIME_SERIES_AMD: TimeSeriesMonthly = {
-    metaData: {
-        information: "Monthly Prices (open, high, low, close) and Volumes",
-        symbol: "AMD",
-        lastRefreshed: "2025-12-02",
-        timeZone: "US/Eastern"
-    },
-    monthlyTimeSeries: {
-        "2025-12-02": { open: "150.0000", high: "152.5000", low: "149.0000", close: "151.3000", volume: "75000000" },
-        "2025-11-28": { open: "145.0000", high: "151.0000", low: "144.0000", close: "149.5000", volume: "72000000" },
-        "2025-10-31": { open: "140.0000", high: "146.0000", low: "139.0000", close: "144.5000", volume: "78000000" },
-        "2025-09-30": { open: "135.0000", high: "141.0000", low: "134.0000", close: "139.5000", volume: "80000000" },
-        "2025-08-29": { open: "130.0000", high: "136.0000", low: "129.0000", close: "134.5000", volume: "82000000" },
-        "2025-07-31": { open: "125.0000", high: "131.0000", low: "124.0000", close: "129.5000", volume: "85000000" },
-        "2025-06-30": { open: "120.0000", high: "126.0000", low: "119.0000", close: "124.5000", volume: "88000000" },
-        "2025-05-30": { open: "115.0000", high: "121.0000", low: "114.0000", close: "119.5000", volume: "90000000" },
-        "2025-04-30": { open: "110.0000", high: "116.0000", low: "109.0000", close: "114.5000", volume: "92000000" },
-        "2025-03-31": { open: "105.0000", high: "111.0000", low: "104.0000", close: "109.5000", volume: "95000000" },
-        "2025-02-28": { open: "100.0000", high: "106.0000", low: "99.0000", close: "104.5000", volume: "98000000" },
-        "2025-01-31": { open: "95.0000", high: "101.0000", low: "94.0000", close: "99.5000", volume: "100000000" },
-        "2024-12-31": { open: "90.0000", high: "96.0000", low: "89.0000", close: "94.5000", volume: "102000000" },
-        "2024-11-29": { open: "85.0000", high: "91.0000", low: "84.0000", close: "89.5000", volume: "105000000" },
-        "2024-10-31": { open: "80.0000", high: "86.0000", low: "79.0000", close: "84.5000", volume: "108000000" },
-        "2024-09-30": { open: "75.0000", high: "81.0000", low: "74.0000", close: "79.5000", volume: "110000000" },
-        "2024-08-30": { open: "70.0000", high: "76.0000", low: "69.0000", close: "74.5000", volume: "112000000" },
-        "2024-07-31": { open: "65.0000", high: "71.0000", low: "64.0000", close: "69.5000", volume: "115000000" }
-    }
-};
-
-export const mockStockData = {
-    'NVDA': {
-        globalQuote: MOCK_GLOBAL_QUOTE_NVDA,
-        companyOverview: MOCK_COMPANY_OVERVIEW_NVDA,
-        monthlyTimeSeries: MOCK_MONTHLY_TIME_SERIES_NVDA,
-    },
-    'MSFT': {
-        globalQuote: MOCK_GLOBAL_QUOTE_MSFT,
-        companyOverview: MOCK_COMPANY_OVERVIEW_MSFT,
-        monthlyTimeSeries: MOCK_MONTHLY_TIME_SERIES_MSFT,
-    },
-    'AMD': {
-        globalQuote: MOCK_GLOBAL_QUOTE_AMD,
-        companyOverview: MOCK_COMPANY_OVERVIEW_AMD,
-        monthlyTimeSeries: MOCK_MONTHLY_TIME_SERIES_AMD,
-    },
+export const mockStockSummaries: Record<string, StockSummary> = {
+  NVDA: NVDA_SUMMARY,
+  MSFT: MSFT_SUMMARY,
+  AMD: AMD_SUMMARY,
 };
