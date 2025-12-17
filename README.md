@@ -1,6 +1,6 @@
 # Expo Baseline
 
-A minimal Expo + React Native starter that targets iOS, Android, and the web with one codebase. The single screen shipped here is intentionally simple—an empty but fully responsive canvas designed for future stock search and workspace features.
+This is a baseline Expo (React Native) application. Use as boilerplate to quickly build new ideas.
 
 To use in conjunction with [spring-boot-baseline](https://github.com/CakeBrewery/spring-boot-baseline)
 
