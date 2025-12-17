@@ -147,7 +147,7 @@
         "tags": [
           "stock-controller"
         ],
-        "summary": "Get a pre-computed workspace summary for a symbol",
+        "summary": "Get a pre-computed summary for a symbol",
         "operationId": "getStockSummary",
         "parameters": [
           {
