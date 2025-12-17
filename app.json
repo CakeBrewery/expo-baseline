@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Expo Baseline",
+    "slug": "expo-baseline",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "platforms": ["ios", "android", "web"],
+    "assetBundlePatterns": ["**/*"],
+    "swizzle": {
+      "expo-router": false
+    }
+  }
+}

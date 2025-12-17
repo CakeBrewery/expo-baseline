@@ -1,0 +1,579 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "spring-boot-baseline API",
+    "description": "REST endpoints that power client experiences.",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local development"
+    },
+    {
+      "url": "https://api.example.com",
+      "description": "Production"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Users",
+      "description": "User management APIs"
+    },
+    {
+      "name": "Favorites",
+      "description": "Stock favorite management APIs"
+    }
+  ],
+  "paths": {
+    "/api/users/{userId}/favorites": {
+      "get": {
+        "tags": [
+          "Users",
+          "Favorites"
+        ],
+        "summary": "Get user favorites",
+        "description": "Returns a list of favorited stocks for a specific user.",
+        "operationId": "getUserFavorites",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "The UUID of the user.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Favorites returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FavoriteStock"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users",
+          "Favorites"
+        ],
+        "summary": "Add a favorite",
+        "description": "Adds a stock to the user\u0027s favorites list.",
+        "operationId": "addFavorite",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "The UUID of the user.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddFavoriteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Favorite added successfully"
+          },
+          "400": {
+            "description": "Invalid input or stock already favorited"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get all users",
+        "description": "Returns a list of all registered users",
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "Users returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected server error"
+          }
+        }
+      }
+    },
+    "/api/stock/monthly-time-series": {
+      "get": {
+        "tags": [
+          "stock-controller"
+        ],
+        "summary": "Get Monthly Time Series for a symbol",
+        "operationId": "getMonthlyTimeSeries",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeSeriesMonthly"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stock/global-quote": {
+      "get": {
+        "tags": [
+          "stock-controller"
+        ],
+        "summary": "Get Global Quote for a symbol",
+        "operationId": "getGlobalQuote",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalQuote"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stock/company-overview": {
+      "get": {
+        "tags": [
+          "stock-controller"
+        ],
+        "summary": "Get Company Overview for a symbol",
+        "operationId": "getCompanyOverview",
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompanyOverview"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/{userId}/favorites/{symbol}": {
+      "delete": {
+        "tags": [
+          "Users",
+          "Favorites"
+        ],
+        "summary": "Remove a favorite",
+        "description": "Removes a stock from the user\u0027s favorites list.",
+        "operationId": "removeFavorite",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "The UUID of the user.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "symbol",
+            "in": "path",
+            "description": "The stock symbol to remove.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Favorite removed successfully"
+          },
+          "404": {
+            "description": "User or favorite not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddFavoriteRequest": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "description": "Representation of a registered user.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the user.",
+            "example": "8b1c7aa8-6c79-4a0b-bb8c-7f8c3f0975c9"
+          },
+          "username": {
+            "type": "string",
+            "description": "Public username used for login and display.",
+            "example": "samdoe"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email address associated with the user account.",
+            "example": "sam@example.com"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Given name.",
+            "example": "Sam"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Family name.",
+            "example": "Doe"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of when the user was created.",
+            "example": "2024-01-01T12:00:00"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the last update to the user.",
+            "example": "2024-01-10T09:30:00"
+          }
+        }
+      },
+      "FavoriteStock": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string"
+          },
+          "addedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MetaData": {
+        "type": "object",
+        "properties": {
+          "information": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "lastRefreshed": {
+            "type": "string"
+          },
+          "timeZone": {
+            "type": "string"
+          }
+        }
+      },
+      "MonthlyData": {
+        "type": "object",
+        "properties": {
+          "open": {
+            "type": "string"
+          },
+          "high": {
+            "type": "string"
+          },
+          "low": {
+            "type": "string"
+          },
+          "close": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "string"
+          }
+        }
+      },
+      "TimeSeriesMonthly": {
+        "type": "object",
+        "properties": {
+          "metaData": {
+            "$ref": "#/components/schemas/MetaData"
+          },
+          "monthlyTimeSeries": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/MonthlyData"
+            }
+          }
+        }
+      },
+      "GlobalQuote": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string"
+          },
+          "open": {
+            "type": "string"
+          },
+          "high": {
+            "type": "string"
+          },
+          "low": {
+            "type": "string"
+          },
+          "price": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "string"
+          },
+          "latestTradingDay": {
+            "type": "string"
+          },
+          "previousClose": {
+            "type": "string"
+          },
+          "change": {
+            "type": "string"
+          },
+          "changePercent": {
+            "type": "string"
+          }
+        }
+      },
+      "CompanyOverview": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string"
+          },
+          "assetType": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "cik": {
+            "type": "string"
+          },
+          "exchange": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "sector": {
+            "type": "string"
+          },
+          "industry": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "officialSite": {
+            "type": "string"
+          },
+          "fiscalYearEnd": {
+            "type": "string"
+          },
+          "latestQuarter": {
+            "type": "string"
+          },
+          "marketCapitalization": {
+            "type": "string"
+          },
+          "ebitda": {
+            "type": "string"
+          },
+          "peRatio": {
+            "type": "string"
+          },
+          "pegRatio": {
+            "type": "string"
+          },
+          "bookValue": {
+            "type": "string"
+          },
+          "dividendPerShare": {
+            "type": "string"
+          },
+          "dividendYield": {
+            "type": "string"
+          },
+          "eps": {
+            "type": "string"
+          },
+          "revenuePerShareTTM": {
+            "type": "string"
+          },
+          "profitMargin": {
+            "type": "string"
+          },
+          "operatingMarginTTM": {
+            "type": "string"
+          },
+          "returnOnAssetsTTM": {
+            "type": "string"
+          },
+          "returnOnEquityTTM": {
+            "type": "string"
+          },
+          "revenueTTM": {
+            "type": "string"
+          },
+          "grossProfitTTM": {
+            "type": "string"
+          },
+          "dilutedEPSTTM": {
+            "type": "string"
+          },
+          "quarterlyEarningsGrowthYOY": {
+            "type": "string"
+          },
+          "quarterlyRevenueGrowthYOY": {
+            "type": "string"
+          },
+          "analystTargetPrice": {
+            "type": "string"
+          },
+          "trailingPE": {
+            "type": "string"
+          },
+          "forwardPE": {
+            "type": "string"
+          },
+          "priceToSalesRatioTTM": {
+            "type": "string"
+          },
+          "priceToBookRatio": {
+            "type": "string"
+          },
+          "evToRevenue": {
+            "type": "string"
+          },
+          "evToEBITDA": {
+            "type": "string"
+          },
+          "beta": {
+            "type": "string"
+          },
+          "fiftyTwoWeekHigh": {
+            "type": "string"
+          },
+          "fiftyTwoWeekLow": {
+            "type": "string"
+          },
+          "fiftyDayMovingAverage": {
+            "type": "string"
+          },
+          "twoHundredDayMovingAverage": {
+            "type": "string"
+          },
+          "sharesOutstanding": {
+            "type": "string"
+          },
+          "dividendDate": {
+            "type": "string"
+          },
+          "exDividendDate": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
